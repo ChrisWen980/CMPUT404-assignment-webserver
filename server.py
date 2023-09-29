@@ -2,6 +2,7 @@
 import socketserver
 import os
 import mimetypes
+import datetime
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -30,8 +31,7 @@ import mimetypes
 
 
 ######################################################################################################################################################
-# References: - https://stackoverflow.com/questions/13503610/how-can-i-get-the-path-of-my-python-script
-#             - https://stackoverflow.com/questions/7585435/best-way-to-convert-string-to-bytes-in-python-3
+# References: - https://stackoverflow.com/questions/7585435/best-way-to-convert-string-to-bytes-in-python-3
 #             - https://www.geeksforgeeks.org/how-to-read-from-a-file-in-python/
 ######################################################################################################################################################
 
@@ -58,7 +58,21 @@ class MyWebServer(socketserver.BaseRequestHandler):
         else:
             self.findFile(filePath)
             return
-                
+    
+    def formResponse(self, statusCode):
+        statusMap = {
+            200: 'HTTP/1.1 200 OK',
+            301: 'HTTP/1.1 301 Moved Permanently',
+            404: 'HTTP/1.1 404 Not Found',
+            405: 'HTTP/1.1 405 Method Not Allowed',
+        }
+
+        date = datetime.datetime.now()
+        
+        response = f'{statusMap[statusCode]}\r\n' + f'{date}\r\n' + 'Connection: close\r\n'
+        return response
+
+
     ######################################################################################################################################################
     # Function Purpose: Checks to see if the method in the request is allowed (only GET should be allowed).
     # Returns: Returns False if the method is not allowed, returns True if the method is allowed.
@@ -66,7 +80,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
     def checkMethod(self):
         errorMethods = ['POST', 'PUT', 'DELETE']
         if self.datalist[0] in errorMethods:
-            self.request.sendall(bytearray('HTTP/1.1 405 Method Not Allowed \r\n', 'utf-8'))
+            #self.request.sendall(bytearray('HTTP/1.1 405 Method Not Allowed \r\n', 'utf-8'))
+            self.request.sendall(bytearray(self.formResponse(405), 'utf-8'))
             return False
         else:
             return True
@@ -76,9 +91,6 @@ class MyWebServer(socketserver.BaseRequestHandler):
     # Returns: Returns False if the method is not allowed, returns True if the method is allowed.
     ######################################################################################################################################################
     def createPath(self):
-        #scriptPath = os.path.dirname(os.path.realpath(__file__))
-        #webPath = './www' + self.datalist[1]
-        #filePath = scriptPath + webPath
         filePath = './www' + self.datalist[1]
         return filePath
     
@@ -89,12 +101,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
     def checkPath(self, filePath):
         print('Starting checkPath...\n')
         print('This is filePath: ', filePath, '\n')
-        #if os.path.exists(filePath):
         if os.path.realpath(filePath).startswith(os.path.realpath('./www')):
             return True
         else:
             print('filePath ', filePath, ' does not exist\n')
-            self.request.sendall(bytearray('HTTP/1.1 404 Not Found \r\n', 'utf-8'))
+            self.request.sendall(bytearray(self.formResponse(404), 'utf-8'))
             return False
 
 
@@ -107,8 +118,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
         print('This is filePath: ', filePath, '\n')
         # If the path references a directory and doesn't end with '/'
         if os.path.isdir(filePath) and not filePath.endswith('/'):
+            self.request.sendall(bytearray(self.formResponse(301), 'utf-8'))
             filePath += '/'
-            self.request.sendall(bytearray('HTTP/1.1 301 Moved Permanently \r\n', 'utf-8'))
             self.request.sendall(bytearray("Location: " + filePath, 'utf-8'))
             print('This is filePath: ', filePath, '\n')
 
@@ -117,15 +128,19 @@ class MyWebServer(socketserver.BaseRequestHandler):
             print('Path ', filePath, ' exists.\n')
             if os.path.isdir(filePath) and filePath.endswith('/'):
                 filePath += 'index.html'
-            self.request.sendall(bytearray('HTTP/1.1 200 OK \r\n', 'utf-8'))
             fileType = mimetypes.guess_type(filePath)[0]
-            self.request.sendall(bytearray('Content-Type: ' + fileType + '; \r\n', 'utf-8'))
+            print('This is fileType: ', fileType)
             openFile = open(filePath, 'r')  
-            self.request.sendall(bytearray(openFile.read(),'utf-8'))
+            content = openFile.read()
             openFile.close()
+            length = len(content.encode('utf-8'))
+            self.request.sendall(bytearray(self.formResponse(200), 'utf-8'))
+            self.request.sendall(bytearray(f'Content-Type: {fileType};\r\n', 'utf-8'))
+            self.request.sendall(bytearray(f'Content-Length: {length}\r\n\r\n', 'utf-8'))
+            self.request.sendall(bytearray(content, 'utf-8'))
         else:
             print('Path ', filePath, ' does not exist.\n')
-            self.request.sendall(bytearray('HTTP/1.1 404 Not Found \r\n', 'utf-8'))
+            self.request.sendall(bytearray(self.formResponse(404), 'utf-8'))
         return
     
 
