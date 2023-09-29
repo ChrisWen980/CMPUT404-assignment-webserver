@@ -75,7 +75,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
         response = f'{statusMap[statusCode]}\r\n' + f'Date: {date}\r\n'
         if Location:
             response += f'Location: {Location}\r\n'
-        response += 'Connection: close\r\n'
+        else:
+            response += 'Connection: close\r\n'
         return response
 
 
@@ -127,7 +128,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         # If the path references a directory and doesn't end with '/'
         if os.path.isdir(filePath) and not filePath.endswith('/'):
             filePath += '/'
-            self.request.sendall(bytearray(self.formResponse(301, Location=filePath), 'utf-8'))
+            self.request.sendall(bytearray(self.formResponse(301, Location=self.datalist[1]+'/'), 'utf-8'))
             #self.request.sendall(bytearray(f'Location: {filePath}\r\n', 'utf-8'))
             print(f'Redirected filePath to: {filePath}\n')
 
@@ -140,11 +141,14 @@ class MyWebServer(socketserver.BaseRequestHandler):
             fileType = mimetypes.guess_type(filePath)[0]
             if dirCheck:
                 fileType += '; charset=utf-8'
+            print(f'Opening file: {filePath}.\n')
             print(f'This is fileType: {fileType}\n')
             openFile = open(filePath, 'r')  
             content = openFile.read()
             openFile.close()
             length = len(content.encode('utf-8'))
+            print(f'This is length: {length}')
+            print(f'This is content: {content}')
 
             self.request.sendall(bytearray(self.formResponse(200), 'utf-8'))
             self.request.sendall(bytearray(f'Content-Type: {fileType}\r\n', 'utf-8'))
