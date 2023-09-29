@@ -107,7 +107,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         if '.html' not in filePath and '.css' not in filePath:
             # Add /index.html and send the Moved Permanently request if the path references a folder but doesn't have '/' at the end
             if filePath[-1] != '/':
-                filePath += '/index.html'
+                filePath += '/'
                 self.request.sendall(bytearray('HTTP/1.1 301 Moved Permanently \r\n', 'utf-8'))
                 self.request.sendall(bytearray("Location: " + filePath, 'utf-8'))
             # Add only index.html as that is the default file for a folder
