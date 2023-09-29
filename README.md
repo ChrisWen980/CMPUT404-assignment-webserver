@@ -29,7 +29,6 @@ References / Collaborators
 ===========================
 
 References:
-- https://stackoverflow.com/questions/13503610/how-can-i-get-the-path-of-my-python-script
 - https://stackoverflow.com/questions/7585435/best-way-to-convert-string-to-bytes-in-python-3
 - https://www.geeksforgeeks.org/how-to-read-from-a-file-in-python/
 
