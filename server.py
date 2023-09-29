@@ -103,22 +103,18 @@ class MyWebServer(socketserver.BaseRequestHandler):
     def findFile(self, filePath):
         print('Starting findFile...\n')
         print('This is filePath: ', filePath, '\n')
-        # If the path already references a file do not add index.html
-        if '.html' not in filePath and '.css' not in filePath:
-            # Add /index.html and send the Moved Permanently request if the path references a folder but doesn't have '/' at the end
-            if filePath[-1] != '/':
-                filePath += '/'
-                self.request.sendall(bytearray('HTTP/1.1 301 Moved Permanently \r\n', 'utf-8'))
-                self.request.sendall(bytearray("Location: " + filePath, 'utf-8'))
-                filePath += 'index.html'
-            # Add only index.html as that is the default file for a folder
-            else:
-                filePath += 'index.html'
+        # If the path references a directory and doesn't end with '/'
+        if os.path.isdir(filePath) and filePath[-1] != '/':
+            filePath += '/'
+            self.request.sendall(bytearray('HTTP/1.1 301 Moved Permanently \r\n', 'utf-8'))
+            self.request.sendall(bytearray("Location: " + filePath, 'utf-8'))
         print('This is filePath: ', filePath, '\n')
 
         # If the path exists give the 200 OK status code, otherwise give the 404 Not Found error code and end the request
         if os.path.exists(filePath):
             print('Path ', filePath, ' exists.\n')
+            if os.path.isdir(filePath) and filePath[-1] == '/':
+                filePath += 'index.html'
             self.request.sendall(bytearray('HTTP/1.1 200 OK \r\n', 'utf-8'))
             fileType = mimetypes.guess_type(filePath)[0]
             self.request.sendall(bytearray('Content-Type: ' + fileType + '; \r\n', 'utf-8'))
