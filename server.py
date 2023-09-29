@@ -30,8 +30,7 @@ import mimetypes
 
 
 ######################################################################################################################################################
-# References: - https://stackoverflow.com/questions/13503610/how-can-i-get-the-path-of-my-python-script
-#             - https://stackoverflow.com/questions/7585435/best-way-to-convert-string-to-bytes-in-python-3
+# References: - https://stackoverflow.com/questions/7585435/best-way-to-convert-string-to-bytes-in-python-3
 #             - https://www.geeksforgeeks.org/how-to-read-from-a-file-in-python/
 ######################################################################################################################################################
 
@@ -46,14 +45,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
         self.data = self.request.recv(1024).strip()
         print ("Got a request of: %s\n" % self.data)
         self.datalist = self.data.decode('utf-8').split(' ')
-
         # Check to see if the method is accepted, if it isn't respond with 405 Method Not Allowed and end the request
         if not self.checkMethod():
             return
-        
         # Get the complete path for the request
         filePath = self.createPath()
-
         # Check to see if the path exists, if it doesn't respond with 404 Not Found and end the request
         if not self.checkPath(filePath):
             return
@@ -79,9 +75,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
     # Returns: Returns False if the method is not allowed, returns True if the method is allowed.
     ######################################################################################################################################################
     def createPath(self):
-        scriptPath = os.path.dirname(os.path.realpath(__file__))
-        webPath = './www' + self.datalist[1]
-        filePath = scriptPath + webPath
+        filePath = os.getcwd() + '/www' + self.datalist[1]
         return filePath
     
     ######################################################################################################################################################
@@ -89,7 +83,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
     # Returns: Returns True if the path does exist, returns False if the path isn't found.
     ######################################################################################################################################################
     def checkPath(self, filePath):
-        print('Starting checkFile...\n')
+        print('Starting checkPath...\n')
         print('This is filePath: ', filePath, '\n')
         if os.path.exists(filePath):
             return True
@@ -104,7 +98,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
     # Returns: Returns nothing, indicating the completion of the request.
     ######################################################################################################################################################
     def findFile(self, filePath):
-        print('Starting checkPath...\n')
+        print('Starting findFile...\n')
         print('This is filePath: ', filePath, '\n')
         # If the path already references a file do not add index.html
         if '.html' not in filePath and '.css' not in filePath:
