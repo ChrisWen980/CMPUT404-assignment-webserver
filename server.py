@@ -104,16 +104,16 @@ class MyWebServer(socketserver.BaseRequestHandler):
         print('Starting findFile...\n')
         print('This is filePath: ', filePath, '\n')
         # If the path references a directory and doesn't end with '/'
-        if os.path.isdir(filePath) and filePath[-1] != '/':
+        if os.path.isdir(filePath) and not filePath.endswith('/'):
             filePath += '/'
             self.request.sendall(bytearray('HTTP/1.1 301 Moved Permanently \r\n', 'utf-8'))
             self.request.sendall(bytearray("Location: " + filePath, 'utf-8'))
-        print('This is filePath: ', filePath, '\n')
+            print('This is filePath: ', filePath, '\n')
 
         # If the path exists give the 200 OK status code, otherwise give the 404 Not Found error code and end the request
         if os.path.exists(filePath):
             print('Path ', filePath, ' exists.\n')
-            if os.path.isdir(filePath) and filePath[-1] == '/':
+            if os.path.isdir(filePath) and filePath.endswith('/'):
                 filePath += 'index.html'
             self.request.sendall(bytearray('HTTP/1.1 200 OK \r\n', 'utf-8'))
             fileType = mimetypes.guess_type(filePath)[0]
