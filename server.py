@@ -30,7 +30,8 @@ import mimetypes
 
 
 ######################################################################################################################################################
-# References: - https://stackoverflow.com/questions/7585435/best-way-to-convert-string-to-bytes-in-python-3
+# References: - https://stackoverflow.com/questions/13503610/how-can-i-get-the-path-of-my-python-script
+#             - https://stackoverflow.com/questions/7585435/best-way-to-convert-string-to-bytes-in-python-3
 #             - https://www.geeksforgeeks.org/how-to-read-from-a-file-in-python/
 ######################################################################################################################################################
 
@@ -75,7 +76,9 @@ class MyWebServer(socketserver.BaseRequestHandler):
     # Returns: Returns False if the method is not allowed, returns True if the method is allowed.
     ######################################################################################################################################################
     def createPath(self):
-        filePath = os.getcwd() + '/www' + self.datalist[1]
+        scriptPath = os.path.dirname(os.path.realpath(__file__))
+        webPath = '/www' + self.datalist[1]
+        filePath = scriptPath + webPath
         return filePath
     
     ######################################################################################################################################################
