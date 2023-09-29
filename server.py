@@ -59,6 +59,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
             self.findFile(filePath)
             return
     
+
+    ######################################################################################################################################################
+    # Function Purpose: Takes the input status code and formulates the response for status code.
+    # Returns: Returns the status code response.
+    ######################################################################################################################################################
     def formResponse(self, statusCode):
         statusMap = {
             200: 'HTTP/1.1 200 OK',
@@ -66,10 +71,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
             404: 'HTTP/1.1 404 Not Found',
             405: 'HTTP/1.1 405 Method Not Allowed',
         }
-
         date = datetime.datetime.now()
-        
-        response = f'{statusMap[statusCode]}\r\n' + f'{date}\r\n' + 'Connection: close\r\n'
+        response = f'{statusMap[statusCode]}\r\n' + f'Date: {date}\r\n' + 'Connection: close\r\n'
         return response
 
 
@@ -86,6 +89,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         else:
             return True
         
+
     ######################################################################################################################################################
     # Function Purpose: Checks to see if the method in the request is allowed (only GET should be allowed).
     # Returns: Returns False if the method is not allowed, returns True if the method is allowed.
@@ -94,17 +98,18 @@ class MyWebServer(socketserver.BaseRequestHandler):
         filePath = './www' + self.datalist[1]
         return filePath
     
+    
     ######################################################################################################################################################
     # Function Purpose: Checks to see if the path requested by the GET method exists.
     # Returns: Returns True if the path does exist, returns False if the path isn't found.
     ######################################################################################################################################################
     def checkPath(self, filePath):
         print('Starting checkPath...\n')
-        print('This is filePath: ', filePath, '\n')
+        print(f'This is filePath: {filePath}\n')
         if os.path.realpath(filePath).startswith(os.path.realpath('./www')):
             return True
         else:
-            print('filePath ', filePath, ' does not exist\n')
+            print(f'filePath {filePath} does not exist\n')
             self.request.sendall(bytearray(self.formResponse(404), 'utf-8'))
             return False
 
@@ -115,31 +120,35 @@ class MyWebServer(socketserver.BaseRequestHandler):
     ######################################################################################################################################################
     def findFile(self, filePath):
         print('Starting findFile...\n')
-        print('This is filePath: ', filePath, '\n')
+        print(f'This is filePath: {filePath}\n')
         # If the path references a directory and doesn't end with '/'
         if os.path.isdir(filePath) and not filePath.endswith('/'):
             self.request.sendall(bytearray(self.formResponse(301), 'utf-8'))
             filePath += '/'
-            self.request.sendall(bytearray("Location: " + filePath, 'utf-8'))
-            print('This is filePath: ', filePath, '\n')
+            self.request.sendall(bytearray(f'Location: {filePath}', 'utf-8'))
+            print(f'This is filePath: {filePath}\n')
 
         # If the path exists give the 200 OK status code, otherwise give the 404 Not Found error code and end the request
         if os.path.exists(filePath):
-            print('Path ', filePath, ' exists.\n')
-            if os.path.isdir(filePath) and filePath.endswith('/'):
+            print(f'Path {filePath} exists.\n')
+            dirCheck = os.path.isdir(filePath) and filePath.endswith('/')
+            if dirCheck:
                 filePath += 'index.html'
             fileType = mimetypes.guess_type(filePath)[0]
-            print('This is fileType: ', fileType)
+            if dirCheck:
+                fileType += '; charset=utf-8'
+            print(f'This is fileType: {fileType}\n')
             openFile = open(filePath, 'r')  
             content = openFile.read()
             openFile.close()
             length = len(content.encode('utf-8'))
+
             self.request.sendall(bytearray(self.formResponse(200), 'utf-8'))
-            self.request.sendall(bytearray(f'Content-Type: {fileType};\r\n', 'utf-8'))
+            self.request.sendall(bytearray(f'Content-Type: {fileType}\r\n', 'utf-8'))
             self.request.sendall(bytearray(f'Content-Length: {length}\r\n\r\n', 'utf-8'))
             self.request.sendall(bytearray(content, 'utf-8'))
         else:
-            print('Path ', filePath, ' does not exist.\n')
+            print(f'Path {filePath} does not exist.\n')
             self.request.sendall(bytearray(self.formResponse(404), 'utf-8'))
         return
     
