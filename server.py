@@ -98,7 +98,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         filePath = './www' + self.datalist[1]
         return filePath
     
-    
+
     ######################################################################################################################################################
     # Function Purpose: Checks to see if the path requested by the GET method exists.
     # Returns: Returns True if the path does exist, returns False if the path isn't found.
@@ -123,10 +123,10 @@ class MyWebServer(socketserver.BaseRequestHandler):
         print(f'This is filePath: {filePath}\n')
         # If the path references a directory and doesn't end with '/'
         if os.path.isdir(filePath) and not filePath.endswith('/'):
-            self.request.sendall(bytearray(self.formResponse(301), 'utf-8'))
             filePath += '/'
-            self.request.sendall(bytearray(f'Location: {filePath}', 'utf-8'))
-            print(f'This is filePath: {filePath}\n')
+            self.request.sendall(bytearray(self.formResponse(301), 'utf-8'))
+            self.request.sendall(bytearray(f'Location: {filePath}\r\n', 'utf-8'))
+            print(f'Redirected filePath to: {filePath}\n')
 
         # If the path exists give the 200 OK status code, otherwise give the 404 Not Found error code and end the request
         if os.path.exists(filePath):
