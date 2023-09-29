@@ -77,7 +77,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
     ######################################################################################################################################################
     def createPath(self):
         scriptPath = os.path.dirname(os.path.realpath(__file__))
-        webPath = '/www' + self.datalist[1]
+        webPath = './www' + self.datalist[1]
         filePath = scriptPath + webPath
         return filePath
     
