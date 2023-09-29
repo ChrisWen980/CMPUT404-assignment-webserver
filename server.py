@@ -110,6 +110,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 filePath += '/'
                 self.request.sendall(bytearray('HTTP/1.1 301 Moved Permanently \r\n', 'utf-8'))
                 self.request.sendall(bytearray("Location: " + filePath, 'utf-8'))
+                filePath += 'index.html'
             # Add only index.html as that is the default file for a folder
             else:
                 filePath += 'index.html'
