@@ -64,7 +64,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
     # Function Purpose: Takes the input status code and formulates the response for status code.
     # Returns: Returns the status code response.
     ######################################################################################################################################################
-    def formResponse(self, statusCode):
+    def formResponse(self, statusCode, Location = None):
         statusMap = {
             200: 'HTTP/1.1 200 OK',
             301: 'HTTP/1.1 301 Moved Permanently',
@@ -72,7 +72,10 @@ class MyWebServer(socketserver.BaseRequestHandler):
             405: 'HTTP/1.1 405 Method Not Allowed',
         }
         date = datetime.datetime.now()
-        response = f'{statusMap[statusCode]}\r\n' + f'Date: {date}\r\n' + 'Connection: close\r\n'
+        response = f'{statusMap[statusCode]}\r\n' + f'Date: {date}\r\n'
+        if Location:
+            response += f'Location: {Location}\r\n'
+        response += 'Connection: close\r\n'
         return response
 
 
@@ -124,8 +127,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
         # If the path references a directory and doesn't end with '/'
         if os.path.isdir(filePath) and not filePath.endswith('/'):
             filePath += '/'
-            self.request.sendall(bytearray(self.formResponse(301), 'utf-8'))
-            self.request.sendall(bytearray(f'Location: {filePath}\r\n', 'utf-8'))
+            self.request.sendall(bytearray(self.formResponse(301, Location=filePath), 'utf-8'))
+            #self.request.sendall(bytearray(f'Location: {filePath}\r\n', 'utf-8'))
             print(f'Redirected filePath to: {filePath}\n')
 
         # If the path exists give the 200 OK status code, otherwise give the 404 Not Found error code and end the request
