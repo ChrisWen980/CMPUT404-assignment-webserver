@@ -76,9 +76,10 @@ class MyWebServer(socketserver.BaseRequestHandler):
     # Returns: Returns False if the method is not allowed, returns True if the method is allowed.
     ######################################################################################################################################################
     def createPath(self):
-        scriptPath = os.path.dirname(os.path.realpath(__file__))
-        webPath = './www' + self.datalist[1]
-        filePath = scriptPath + webPath
+        #scriptPath = os.path.dirname(os.path.realpath(__file__))
+        #webPath = './www' + self.datalist[1]
+        #filePath = scriptPath + webPath
+        filePath = './www' + self.datalist[1]
         return filePath
     
     ######################################################################################################################################################
@@ -88,7 +89,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
     def checkPath(self, filePath):
         print('Starting checkPath...\n')
         print('This is filePath: ', filePath, '\n')
-        if os.path.exists(filePath):
+        #if os.path.exists(filePath):
+        if os.path.realpath(filePath).startswith(os.path.realpath('./www')):
             return True
         else:
             print('filePath ', filePath, ' does not exist\n')
